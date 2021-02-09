@@ -1,0 +1,2 @@
+date,account,name,price,qty,price_qty,action,execution_status,fees,amount,portfolio,book
+10-Aug-15,SCB,STI ETF,3.04,97,294.88,Buy,y,2.5,297.38,rodion,trading

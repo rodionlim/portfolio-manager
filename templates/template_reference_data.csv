@@ -1,0 +1,4 @@
+name,short_name,description,yahoo_ticker,google_ticker,asset_class,product,main_country,trade_ccy
+STI ETF,sti etf,straits times index,es3.si,NI225,equity,etf,singapore,SGD
+NetLink NBN Tr,netlink,netlink trust,cjlu.si,,equity,stock,singapore,SGD
+SSB,ssb,singapore savings bond,,,bond,govies,singapore,SGD
