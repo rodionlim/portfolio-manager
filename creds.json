@@ -1,0 +1,9 @@
+{
+    "conn_param_admin":{
+            "host":"localhost",
+            "user":"admin",
+            "passwd":"password",
+            "db":"coredb",
+            "port":3306
+    }
+}
