@@ -1,0 +1,29 @@
+table,field,description
+reference_data,name,Unique ticker name
+reference_data,short_name,Ticker short name - can be use to group 2 different tickers together e.g. es3.si and g3b.si
+reference_data,description,Ticker long description
+reference_data,yahoo_ticker,yahoo ticker e.g. es3.si
+reference_data,google_ticker,google ticker e.g. o39
+reference_data,asset_class,equities | fx 
+reference_data,product,stock | bond | reit
+reference_data,sub_product,More granular classification
+reference_data,main_country,e.g. singapore | united states | hong kong
+reference_data,exchange,Exchange where ticker is listed
+reference_data,trade_ccy,Exchange traded currency e.g. sgd | usd
+reference_data,ccy1,Applicable only for crypto / fx currency [base currency]
+reference_data,ccy2,Applicable only for crypto / fx currency [foreign currency]
+reference_data,active,Instrument is still listed or not
+reference_data,price_overwrite,Some instruments have a fixed redemption price - e.g. singapore savings bond can always be redeemed at par
+blotter,date,Trade entry date
+blotter,account,Brokerage account that the trade was booked in
+blotter,name,Unique ticker name
+blotter,strategy,Strategy for the trade
+blotter,price,Price
+blotter,qty,Number of units
+blotter,price_qty,Price * Number of units
+blotter,action,Buy | Sell
+blotter,execution_status,h for hypothetical | y for real trade
+blotter,fees,brokerage & exchange costs + any additional costs
+blotter,amount,price * quantity plus fees
+blotter,portfolio,Portfolio user
+blotter,book,trading | banking

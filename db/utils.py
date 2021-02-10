@@ -71,7 +71,6 @@ def dao_entity_generators(tableName: str,
     print(f"class {entityName}(Base):")
     print(f"    __tablename__ = '{tableName}'")
     print(f'    id = Column(Integer, primary_key=True)')
-    print(f'    filedate = Column(Date, index=True)')
 
     setIndexStr = ", index=True"
 
@@ -81,13 +80,18 @@ def dao_entity_generators(tableName: str,
         # Sanitization
         if "date" in col.lower():
             coltype = "DateTime"
-            if col.lower() in ["trade_date"]:
+            if col.lower() in ["trade_date", "date"]:
                 idx = setIndexStr
         if not coltype:
             coltype = "UNMAPPED"
-        if col.lower() in ["instrument", "portfolio"]:
+        if col.lower() in [
+                "instrument", "portfolio", "name", "short_name", "book",
+                "strategy"
+        ]:
             # Columns with index
             idx = setIndexStr
+        if col.lower() in ["yahoo_ticker", "google_ticker"]:
+            coltype = "String(30)"
 
         print(
             f'    {col.replace(" / ","_Or_").replace("&","").replace(" ","_").replace("/", "_").replace(".","_")} = Column({coltype}{idx})'
@@ -100,12 +104,15 @@ def dao_entity_generators(tableName: str,
     print()
     dao_creator_str = f'''
 --- Paste this into dao.py ---
-class {entityName}(BrokerFilesBaseDao):
+
+class {entityName}(BaseDao):
     pass
+
 def get_{entityName}_dao():
     """Don't create DAO object but use `get_xxx_dao()`, since DAO object should be singleton"""
     return {entityName}(entity.{entityName})
+
 --- END ---
-You might want to change the inheritence from BrokerFilesBaseDao to something else
+You might want to change the inheritence from BaseDao to something else
 '''
     print(dao_creator_str)

@@ -1,2 +1,2 @@
-date,name,dividend_amount
-18-Feb,STI ETF,0.050996
+date,name,dividend_amount,witholding_tax
+18-Feb-2021,STI ETF,0.050996,0
