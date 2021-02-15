@@ -71,4 +71,5 @@ class Dividends(Base):
     portfolio = Column(String(80), index=True)
     book = Column(String(80), index=True)
     qty = Column(DECIMAL(40, 8))
+    dps = Column(DECIMAL(40, 8))
     amount = Column(DECIMAL(40, 8))

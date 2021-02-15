@@ -27,3 +27,11 @@ blotter,fees,brokerage & exchange costs + any additional costs
 blotter,amount,price * quantity plus fees
 blotter,portfolio,Portfolio user
 blotter,book,trading | banking
+dividends,date,Dividend ex-date
+dividends,name,Unique ticker name
+dividends,strategy,Strategy for the trade
+dividends,portfolio,Portfolio user
+dividends,book,trading | banking
+dividends,qty,Number of units
+dividends,dps,Dividend per share
+dividends,amount,Total dividends to be received - dps * qty

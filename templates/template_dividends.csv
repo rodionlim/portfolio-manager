@@ -1,2 +1,2 @@
-date,name,strategy,portfolio,book,qty,amount
-29-Jan-16,STI ETF,long_sg,rodion,banking,542,27.64
+date,name,strategy,portfolio,book,qty,dps,amount
+29-Jan-16,STI ETF,long_sg,rodion,banking,542,0.05099631,27.64
