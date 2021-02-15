@@ -23,10 +23,11 @@ class Blotter(Base):
     book = Column(String(80), index=True)
 
 
-class Dividends(Base):
-    __tablename__ = 'dividends'
+class MarketDividends(Base):
+    __tablename__ = 'market_dividends'
     id = Column(Integer, primary_key=True)
     date = Column(Date, index=True)
+    ex_date = Column(Date, index=True)
     name = Column(String(80), index=True)
     dividend_amount = Column(DECIMAL(40, 8))
     witholding_tax = Column(BIGINT)
@@ -59,3 +60,15 @@ class Metadata(Base):
     table = Column(String(80))
     field = Column(String(80))
     description = Column(String(200))
+
+
+class Dividends(Base):
+    __tablename__ = 'dividends'
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, index=True)
+    name = Column(String(80), index=True)
+    strategy = Column(String(80), index=True)
+    portfolio = Column(String(80), index=True)
+    book = Column(String(80), index=True)
+    qty = Column(DECIMAL(40, 8))
+    amount = Column(DECIMAL(40, 8))

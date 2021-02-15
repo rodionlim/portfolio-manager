@@ -15,7 +15,7 @@ cfg = read_cfg()
 BASE_DIR = os.path.join(os.path.dirname(__file__), "..")
 
 
-def generate_dao() -> None:
+def generate_orm() -> None:
     for table in cfg.get("tables"):
         path = os.path.join(BASE_DIR, "templates",
                             "template_" + table + ".csv")
@@ -33,8 +33,8 @@ def create():
 
 def seed():
     """ Seed initial tables """
-    # for table in cfg.get("tables"):
-    for table in cfg.get("seeded_tables"):
+    for table in cfg.get("tables"):
+        # for table in cfg.get("seeded_tables"):
         logging.info(f"Seeding {table} with data")
         path = os.path.join(BASE_DIR, "templates",
                             "template_" + table + ".csv")
@@ -42,9 +42,11 @@ def seed():
         Entity = getattr(entity, entity_name)
         dao_obj = getattr(dao, f'get_{entity_name}_dao')()
         data = pd.read_csv(path)
-        if "date" in data:
-            data["date"] = pd.to_datetime(
-                data["date"]).apply(lambda x: x.date())
+
+        # Convert dates to python understandable dates
+        for col in ["date", "ex_date"]:
+            if col in data:
+                data[col] = pd.to_datetime(data[col]).apply(lambda x: x.date())
         data = data.where(pd.notnull(data), None).to_dict(orient="records")
         entities = [Entity(**x) for x in data]
 
@@ -61,5 +63,6 @@ def seed():
 
 
 if __name__ == "__main__":
+    # generate_orm()
     create()
     seed()

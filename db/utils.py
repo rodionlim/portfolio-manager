@@ -79,8 +79,8 @@ def dao_entity_generators(tableName: str,
         idx = ""
         # Sanitization
         if "date" in col.lower():
-            coltype = "DateTime"
-            if col.lower() in ["trade_date", "date"]:
+            coltype = "Date"
+            if col.lower() in ["trade_date", "date", "ex_date"]:
                 idx = setIndexStr
         if not coltype:
             coltype = "UNMAPPED"

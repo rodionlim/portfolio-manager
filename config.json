@@ -1,4 +1,4 @@
 {
-    "tables": ["blotter", "dividends", "reference_data", "metadata"],
+    "tables": ["blotter", "market_dividends", "reference_data", "metadata", "dividends"],
     "seeded_tables": ["reference_data", "metadata"]
 }

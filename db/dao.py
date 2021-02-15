@@ -64,13 +64,13 @@ def get_Blotter_dao():
     return Blotter(entity.Blotter)
 
 
-class Dividends(BaseDao):
+class MarketDividends(BaseDao):
     pass
 
 
-def get_Dividends_dao():
+def get_MarketDividends_dao():
     """Don't create DAO object but use `get_xxx_dao()`, since DAO object should be singleton"""
-    return Dividends(entity.Dividends)
+    return MarketDividends(entity.MarketDividends)
 
 
 class ReferenceData(BaseDao):
@@ -89,3 +89,12 @@ class Metadata(BaseDao):
 def get_Metadata_dao():
     """Don't create DAO object but use `get_xxx_dao()`, since DAO object should be singleton"""
     return Metadata(entity.Metadata)
+
+
+class Dividends(BaseDao):
+    pass
+
+
+def get_Dividends_dao():
+    """Don't create DAO object but use `get_xxx_dao()`, since DAO object should be singleton"""
+    return Dividends(entity.Dividends)
