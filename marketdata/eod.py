@@ -16,7 +16,14 @@ class EodPriceManager:
         self._reference_dao = dao.get_ReferenceData_dao()
 
     def get_all(self):
-        pass
+        tickers = self._get_relevant_tickers()
+        for ticker in tickers:
+            # TODO: make this async with asyncio
+            print(ticker)
+            try:
+                print(self.get_market_data(ticker))
+            except:
+                logging.error(f"{ticker} can't be queried from api")
 
     def get_market_data(self,
                         ticker: str = "ES3.SI") -> requests.models.Response:
@@ -35,9 +42,13 @@ class EodPriceManager:
 
     def _get_relevant_tickers(self):
         with sqlalchemy_engine_session() as session:
-            ref = self._reference_dao.mget_all(session)
+            ref = entity_to_df(self._reference_dao.mget_all(session))
+            ref = ref[ref["active"]]
+        return [x for x in list((ref["yahoo_ticker"])) if x]
 
 
 if __name__ == "__main__":
     epm = EodPriceManager()
+    print(epm._get_relevant_tickers())
     print(epm.get_market_data("ES3.SI"))
+    epm.get_all()
