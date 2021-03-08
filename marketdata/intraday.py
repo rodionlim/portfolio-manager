@@ -15,7 +15,7 @@ class IntradayPriceManager():
         self.ws_url = "wss://data.tradingview.com/socket.io/websocket"
         self.t = None
 
-    def run(self):
+    def get(self):
         # websocket.enableTrace(True)
         ws = websocket.WebSocketApp(self.ws_url,
                                     on_open=self.on_open,
@@ -78,4 +78,4 @@ class IntradayPriceManager():
 
 if __name__ == "__main__":
     ipm = IntradayPriceManager()
-    ipm.run()
+    ipm.get()
