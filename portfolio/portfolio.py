@@ -3,6 +3,7 @@ import pandas as pd
 
 from pf_manager.db import sqlalchemy_engine_session, dao
 from pf_manager.db.utils import entity_to_df
+from pf_manager.utilfns.log import setup_log
 
 
 class PortfolioManager():
@@ -29,10 +30,13 @@ class PortfolioManager():
         group_keys = ["name"] if not group_keys else group_keys
         return data.groupby(group_keys)["qty"].apply(lambda x: x.sum())
 
-    def calc_dividends(self, force_calc: bool = False) -> pd.DataFrame:
+    def calc_dividends(self,
+                       force_calc: bool = False,
+                       to_db: bool = False) -> pd.DataFrame:
         """ 
         Calculate dividend amount for portfolio based on positions, market dividend amount and ex-date.
         force_calc:  recalculate dividends whether it has been calculated previously or not
+        to_db: upload results to db
         """
         results = pd.DataFrame()
         blotter = self._extract_blotter()
@@ -59,6 +63,10 @@ class PortfolioManager():
             if not dividends.empty and not force_calc:
                 dates_to_be_computed = set(market_dividends["ex_date"]) - set(
                     dividends["date"])
+                if len(dates_to_be_computed) > 0:
+                    logging.info(f"{ticker} has new dividends to be computed")
+                else:
+                    continue
             else:
                 dates_to_be_computed = set(market_dividends["ex_date"])
 
@@ -71,6 +79,15 @@ class PortfolioManager():
                 )
                 d = self._compute_single_dividend(dividend, entries)
                 results = pd.concat([results, d])
+
+            if to_db:
+                logging.info("Committing computed dividends to database")
+                with sqlalchemy_engine_session() as session:
+                    Entity = self.dividends_dao.Entity
+                    self.dividends_dao.add_all(session, [
+                        Entity(**x) for x in results.to_dict(orient="records")
+                    ])
+                    session.commit()
         return results
 
     def _compute_capital_gains_pl(self):
@@ -115,5 +132,6 @@ class PortfolioManager():
 
 
 if __name__ == "__main__":
+    setup_log()
     pm = PortfolioManager("rodion")
-    x = pm.calc_dividends()
+    x = pm.calc_dividends(to_db=True)
