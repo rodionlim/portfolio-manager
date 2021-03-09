@@ -16,25 +16,28 @@ class IntradayPriceManager():
         self.t = None
 
     def get(self):
-        # websocket.enableTrace(True)
+        websocket.enableTrace(True)
         ws = websocket.WebSocketApp(self.ws_url,
-                                    on_open=self.on_open,
+                                    on_open=lambda ws: self.on_open(ws),
                                     on_close=self.on_close,
                                     on_message=self.on_message,
                                     on_error=self.on_error)
         ws.run_forever()
 
-    def on_message(self, ws, message):
+    @staticmethod
+    def on_message(ws, message):
         pattern = re.compile(r'~m~\d+~m~~h~\d+$')
         if pattern.match(message):
             ws.send(message)
         else:
             print(message)
 
-    def on_error(self, ws, error):
+    @staticmethod
+    def on_error(ws, error):
         print(error)
 
-    def on_close(self, ws):
+    @staticmethod
+    def on_close(ws):
         print("### closed ###")
 
     def on_open(self, ws):
@@ -54,7 +57,7 @@ class IntradayPriceManager():
             ws.send(create_msg("quote_set_fields", [session, "lp"]))
             [ws.send(self._add_symbol(session, s)) for s in syms]
             ws.send(create_msg("quote_fast_symbols", [session, *syms]))
-            ws.send(create_msg("quote_hibernate_all", [session]))
+            # ws.send(create_msg("quote_hibernate_all", [session]))
 
         self.t = threading.Thread(target=run)
         self.t.setDaemon(True)
