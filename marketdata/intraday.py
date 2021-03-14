@@ -42,7 +42,8 @@ class IntradayPriceManager():
 
     def on_open(self, ws):
         def run(*args):
-            session = self._gen_quote_session()
+            session = self._gen_session()  # Quote session ID
+            # c_session = self._gen_session(type="chart")  # Chart session ID
 
             # ~m~52~m~{"m":"quote_create_session","p":["qs_3bDnffZvz5ur"]}
             # ~m~395~m~{"m":"quote_set_fields","p":["qs_3bDnffZvz5ur","ch","chp","lp"]}
@@ -59,6 +60,10 @@ class IntradayPriceManager():
             ws.send(create_msg("quote_fast_symbols", [session, *syms]))
             # ws.send(create_msg("quote_hibernate_all", [session]))
 
+            # ws.send(create_msg("chart_create_session", [c_session, ""]))
+            # ws.send(create_msg("resolve_symbol", [c_session, "symbol_1", self._add_chart_symbol("BINANCE:ETHUSD")]))
+            # ws.send(create_msg("create_series", [c_session, "s1", "s1", "symbol1", "15", 300])
+
         self.t = threading.Thread(target=run)
         self.t.setDaemon(True)
         self.t.start()
@@ -67,13 +72,24 @@ class IntradayPriceManager():
         """ _create_msg("set_auth_token", "unauthorized_user_token") """
         return self._prepend_header(json.dumps({"m": func, "p": params}))
 
-    def _gen_quote_session(self):
+    def _gen_session(self, type="quote"):
         # ~m~52~m~{"m":"quote_create_session","p":["qs_3bDnffZvz5ur"]}
-        return "qs_" + "".join(random.choices(string.ascii_letters, k=12))
+        session = ""
+        if type == "quote":
+            session = "qs"
+        elif type == "chart":
+            session = "cs"
+        else:
+            raise Exception("Invalid session type")
+        return session + "".join(random.choices(string.ascii_letters, k=12))
 
     def _add_symbol(self, quote_session: str, sym: str):
-        """ _add_symbol("3bDnffZvz5ur", "BINANCE:UNIUSD") """
+        """ Quote symbol: _add_symbol("3bDnffZvz5ur", "BINANCE:UNIUSD") """
         return self._create_msg("quote_add_symbols", [quote_session, sym])
+
+    def _add_chart_symbol(self, sym: str):
+        """ Chart symbol """
+        return "=" + json.dumps({"symbol": sym, "adjustment": "splits"})
 
     def _prepend_header(self, msg):
         return f'~m~{len(msg)}~m~{msg}'
