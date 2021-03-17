@@ -42,6 +42,7 @@ class ReferenceData(Base):
     description = Column(String(600))
     yahoo_ticker = Column(String(30), index=True)
     google_ticker = Column(String(30), index=True)
+    tradingview_ticker = Column(String(50), index=True)
     asset_class = Column(String(80))
     product = Column(String(80))
     sub_product = Column(String(80))
