@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean, DECIMAL
 
-from db.dao import _session, BaseDAOModel
+from pf_manager.db.orm import _session, BaseDAOModel
 
 
 class Entity(declarative_base()):

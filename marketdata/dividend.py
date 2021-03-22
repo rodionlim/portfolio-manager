@@ -5,7 +5,7 @@ from collections import deque
 import pandas as pd
 import re
 
-from db.dao.reference_data import DAO
+from pf_manager.db.orm.reference_data import DAO
 
 
 class DividendManager:
@@ -67,8 +67,15 @@ class DividendManager:
                         ]
                 data.append([ele.text.strip() for ele in cols])
         results = pd.DataFrame(data[1:], columns=data[0])
-        results["Amount"] = results["Amount"].apply(
-            lambda x: float(re.search(r'[\d.$]+', "SGD0.0123").group()))
+
+        def parseAmount(val):
+            find = re.search(r'[\d.$]+', val)
+            if find:
+                return float(find.group())
+            else:
+                return None
+
+        results["Amount"] = results["Amount"].apply(lambda x: parseAmount(x))
         return results.groupby(["Ex Date",
                                 "Pay Date"])["Amount"].sum().reset_index()
 
@@ -82,5 +89,7 @@ class DividendManager:
 if __name__ == "__main__":
     # htmls = asyncio.gather(*tasks)
     dm = DividendManager()
+    # print(dm.get_sync())
+
     loop = asyncio.get_event_loop()
     loop.run_until_complete(dm.get(ticker="AJBU"))
