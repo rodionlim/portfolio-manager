@@ -10,6 +10,7 @@ import ujson as json
 LOGGER = logging.getLogger(__name__)
 
 
+# TODO: migrate to class methods
 def get_creds_file():
     return os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", 'creds.json'))
