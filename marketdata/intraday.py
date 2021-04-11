@@ -1,3 +1,9 @@
+""" 
+IntradayPriceManager connects to TradingView and stores indicators and price series in an
+in memory dictionary self._alerts. These indicators are then published to slack periodically.
+"""
+
+import datetime
 import json
 import random
 import re
@@ -8,6 +14,10 @@ import websocket
 
 class IntradayPriceManager():
     def __init__(self, debug=False):
+        self._alerts = {
+            "indicators": {},
+            "price": {}
+        }  # In-memory dict of alerts to be sent out to slack
         self._debug = debug
         self._histbars = 300
         self._indicators = []
@@ -27,27 +37,63 @@ class IntradayPriceManager():
             syms: list of symbols, e.g. [BINANCE:ETHUSD]
             indicators: list of indicators, e.g. [rsi]
             timeframe: int of minutes of chart time frame, e.g. 240 -> 4 hours chart
+            histbars: int of number of historical data points, e.g. 300
         """
         websocket.enableTrace(True)
         ws = websocket.WebSocketApp(
             self._ws_url,
             on_open=lambda ws: self.on_open(ws, type, **kwargs),
             on_close=self.on_close,
-            on_message=self.on_message,
+            on_message=lambda ws, message: self.on_message(ws, message),
             on_error=self.on_error)
         ws.run_forever()
 
-    @staticmethod
-    def on_message(ws, message):
+    def on_message(self, ws, message):
         pattern = re.compile(r'~m~\d+~m~~h~\d+$')
         if pattern.match(message):
             ws.send(message)
         else:
             msg_body = re.compile(r'~m~\d+~m~')
             messages = msg_body.split(message)
-            # du -> data update
-            # timescale_update -> initial historical data
-            [print(json.loads(x)) for x in messages if x]
+            for msg in messages:
+                if msg:
+                    parsed_msg = json.loads(msg)
+                    params = parsed_msg.get("p")
+                    if parsed_msg.get("m") == "timescale_update":
+                        # timescale_update -> initial historical data
+                        # TODO: handling of these data for plotting on UI
+                        continue
+                    if parsed_msg.get("m") == "du":
+                        # du -> data update
+                        sym = self._state.get(params[0]).get("sym")
+                        now = datetime.datetime.now().strftime(
+                            '%Y-%m-%d %H:%M:%S')
+                        for k, v in params[1].items():
+                            if v.get("st"):
+                                # study
+                                indicator = k.split("_")[0]
+                                vals = v.get("st")[0].get("v")
+                                val = vals[1]
+                                val_dict = {"dtime": now, indicator: val}
+                                print({sym: val_dict})
+                                if not self._alerts["indicators"].get(sym):
+                                    self._alerts["indicators"][sym] = {}
+                                self._alerts["indicators"][sym][
+                                    indicator] = val
+                            elif v.get("s"):
+                                # series
+                                vals = v.get("s")[0].get("v")
+                                val_dict = dict(
+                                    zip([
+                                        "dtime", "open", "high", "low", "last",
+                                        "vol"
+                                    ], vals))
+                                val_dict["dtime"] = now
+                                print({sym: val_dict})
+                                if not self._alerts["price"].get(sym):
+                                    self._alerts["price"][sym] = {}
+                                self._alerts["price"][sym]["last"] = val_dict[
+                                    "last"]
 
     @staticmethod
     def on_error(ws, error):
@@ -101,20 +147,20 @@ class IntradayPriceManager():
                         self._add_chart_symbol(sym)
                     ])
                     # s (in resp) -> series
-                    self._state[c_session].get("series").append(f"s{i}")
+                    self._state[c_session].get("series").append(f"s_{i}")
                     send(ws, "create_series", [
-                        c_session, f"s{i}", f"s{i}", f"symbol_{i}", timeframe,
-                        histbars
+                        c_session, f"s_{i}", f"s_{i}", f"symbol_{i}",
+                        timeframe, histbars
                     ])
 
                     for indicator in indicators:
                         # Users are allowed to select specific indicators
                         # st (in resp) -> study
                         self._state[c_session].get("indicators").append(
-                            f"{indicator}{i}")
+                            f"{indicator}_{i}")
                         send(ws, "create_study", [
-                            c_session, f"{indicator}{i}", f"{indicator}{i}",
-                            f"s{i}", "Script@tv-scripting-101!",
+                            c_session, f"{indicator}_{i}", f"{indicator}_{i}",
+                            f"s_{i}", "Script@tv-scripting-101!",
                             self._indicator_mapper(indicator)
                         ])
 
@@ -190,4 +236,4 @@ if __name__ == "__main__":
             syms=["BINANCE:DOTUSD", "BINANCE:ETHUSD"],
             indicators=["rsi"],
             timeframe=240,
-            histbars=10)
+            histbars=300)

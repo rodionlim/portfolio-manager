@@ -19,6 +19,14 @@ Portfolio Manager is an end-to-end portfolio booking system which supports multi
 - Start a mySQL database
 - Run scripts/seed_tables.py script in pf_manager > scripts to create and populate the initial tables
 
+### Slack
+
+- For slack alerts to work, create `slackcred.json` at the root of the repository
+- Create an app in slack by following the steps [here](https://api.slack.com/start/building/bolt-python)
+- Put the Bot User OAuth Token into a key value pair in the JSON file,e.g. `"BOT_TOKEN": "xoxb-..."`
+- Create a new channel in slack
+- Invite the bot ("app") to the channel by typing /invite -> Add apps to the channel
+
 <br>
 
 ## Market Data
