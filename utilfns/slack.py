@@ -1,7 +1,12 @@
+import datetime
+import logging
+import pandas as pd
 import slack
+from typing import List, Tuple
 import ujson
 
 SLACKCREDS_JSON = 'slackcreds.json'
+LOGGER = logging.getLogger(__name__)
 
 
 def client():
@@ -22,6 +27,17 @@ def make_slack_block(prefix, sgt, df):
             }
         }
         yield block
+
+
+def send_alert(channel, alert_list_df: List[Tuple[str, pd.DataFrame]]):
+    for fld, df in alert_list_df:
+        now = datetime.datetime.now()
+        for block in slack.make_slack_block(f'{fld.upper()}', now, df):
+            resp = slack.client().chat_postMessage(channel=f'{channel}',
+                                                   blocks=[block])
+            LOGGER.info(
+                f'sent to slack {fld} break size[{len(df)}] channel[{channel}] resp[{resp}]'
+            )
 
 
 if __name__ == "__main__":

@@ -5,11 +5,14 @@ in memory dictionary self._alerts. These indicators are then published to slack 
 
 import datetime
 import json
+import pandas as pd
 import random
 import re
 import string
 import threading
 import websocket
+
+from utilfns.slack import send_alert
 
 
 class IntradayPriceManager():
@@ -18,6 +21,7 @@ class IntradayPriceManager():
             "indicators": {},
             "price": {}
         }  # In-memory dict of alerts to be sent out to slack
+        self._slackchannel = "C01UACFTMTK"  # TODO: Shift to config
         self._debug = debug
         self._histbars = 300
         self._indicators = []
@@ -47,6 +51,12 @@ class IntradayPriceManager():
             on_message=lambda ws, message: self.on_message(ws, message),
             on_error=self.on_error)
         ws.run_forever()
+
+    def send():
+        """
+        Periodic slack alerts
+        """
+        raise NotImplementedError
 
     def on_message(self, ws, message):
         pattern = re.compile(r'~m~\d+~m~~h~\d+$')
