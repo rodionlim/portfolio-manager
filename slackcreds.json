@@ -1,0 +1,7 @@
+{
+  "APP_ID": "xxxxx",
+  "CLIENT_ID": "xxxxx",
+  "CLIENT_SECRET": "xxxxx",
+  "SIGNING_SECRET": "xxxxx",
+  "BOT_TOKEN": "xoxb-{bot oauth token}"
+}
