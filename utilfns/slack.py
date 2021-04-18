@@ -32,9 +32,9 @@ def make_slack_block(prefix, sgt, df):
 def send_alert(channel, alert_list_df: List[Tuple[str, pd.DataFrame]]):
     for fld, df in alert_list_df:
         now = datetime.datetime.now()
-        for block in slack.make_slack_block(f'{fld.upper()}', now, df):
-            resp = slack.client().chat_postMessage(channel=f'{channel}',
-                                                   blocks=[block])
+        for block in make_slack_block(f'{fld.upper()}', now, df):
+            resp = client().chat_postMessage(channel=f'{channel}',
+                                             blocks=[block])
             LOGGER.info(
                 f'sent to slack {fld} break size[{len(df)}] channel[{channel}] resp[{resp}]'
             )

@@ -9,6 +9,7 @@ import pandas as pd
 import random
 import re
 import string
+import time
 import threading
 import websocket
 
@@ -21,15 +22,16 @@ class IntradayPriceManager():
             "indicators": {},
             "price": {}
         }  # In-memory dict of alerts to be sent out to slack
-        self._slackchannel = "C01UACFTMTK"  # TODO: Shift to config
         self._debug = debug
         self._histbars = 300
         self._indicators = []
+        self._slackchannel = "C01UACFTMTK"  # TODO: Shift to config
+        self._slackfreq = 300  # Every 5 mins
+        self._state = {}
         self._syms = [
             "BINANCE:UNIUSD", "BINANCE:ETHUSD", "BINANCE:DOTUSD", "SGX:ES3",
             "SGX:CLR"
         ]
-        self._state = {}
         self._t = None
         self._timeframe = 240  # Default to 4 hours chart
         self._ws_url = "wss://data.tradingview.com/socket.io/websocket"
@@ -52,11 +54,17 @@ class IntradayPriceManager():
             on_error=self.on_error)
         ws.run_forever()
 
-    def send():
+    def send_slack(self):
         """
-        Periodic slack alerts
+        Periodic slack alerts - Indicators
         """
-        raise NotImplementedError
+        while True:
+            indicators = self._alerts.get("indicators")
+            if indicators:
+                res = pd.DataFrame(indicators).transpose().reset_index()
+                res.rename(columns={"index": "sym"}, inplace=True)
+                send_alert(self._slackchannel, [("Indicators", res)])
+            time.sleep(self._slackfreq)
 
     def on_message(self, ws, message):
         pattern = re.compile(r'~m~\d+~m~~h~\d+$')
@@ -85,7 +93,7 @@ class IntradayPriceManager():
                                 vals = v.get("st")[0].get("v")
                                 val = vals[1]
                                 val_dict = {"dtime": now, indicator: val}
-                                print({sym: val_dict})
+                                # print({sym: val_dict})
                                 if not self._alerts["indicators"].get(sym):
                                     self._alerts["indicators"][sym] = {}
                                 self._alerts["indicators"][sym][
@@ -99,7 +107,7 @@ class IntradayPriceManager():
                                         "vol"
                                     ], vals))
                                 val_dict["dtime"] = now
-                                print({sym: val_dict})
+                                # print({sym: val_dict})
                                 if not self._alerts["price"].get(sym):
                                     self._alerts["price"][sym] = {}
                                 self._alerts["price"][sym]["last"] = val_dict[
@@ -241,9 +249,16 @@ class IntradayPriceManager():
 
 
 if __name__ == "__main__":
+
     ipm = IntradayPriceManager()
+    alerting_thread = threading.Thread(target=ipm.send_slack)
+    alerting_thread.start()
+
     ipm.get(type="chart",
-            syms=["BINANCE:DOTUSD", "BINANCE:ETHUSD"],
+            syms=[
+                "BINANCE:BTCUSD", "BINANCE:ETHUSD", "BINANCE:DOTUSD",
+                "BINANCE:UNIUSD", "BINANCE:SOLUSD"
+            ],
             indicators=["rsi"],
             timeframe=240,
             histbars=300)
